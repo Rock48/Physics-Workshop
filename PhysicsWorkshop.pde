@@ -25,9 +25,29 @@ PFont font;
 boolean frozenEnabled;
 int screwsRemaining;
 boolean menuOpen;
+String gamestateBuffer;
 
+int b1r;
+int b2r;
+
+int b1g;
+int b2g;
+
+int b1b;
+int b2b;
+
+boolean button1;
+boolean button2;
 
 void setup(){
+  b1r = 255;
+  b2r = 255;
+  b1g = 255;
+  b2g = 255;
+  b1b = 255;
+  b2b = 255;
+  button1 = false;
+  button2 = false;
   menuOpen = false;
   screwsRemaining = 3;
   frozenEnabled = false;
@@ -61,10 +81,11 @@ void setup(){
 }
 void draw() {
   background(255);
-  if(menuOpen){
-    menu();
+
+  if(gameState!="menu"){
+    box2d.step();
   }
-  box2d.step();
+  
   if(itemSelected == "box"){
     if(keyPressed && key == 'd' && boxWidth < 250){
       boxWidth += 1;
@@ -91,11 +112,29 @@ void draw() {
     }
 
   }
+  if(gameState == "menu"){
+    cursor();
+  }
+  if(gameState == "preGame"){
+    noCursor();
+  }
+  if(gameState == "won"){
+    noCursor();
+  }
+  if(gameState == "planning"){
+    noCursor();
+  }
+  if(gameState == "game"){
+    cursor();
+  }
   surface.display();
   b1.display();
   b2.display();
   b3.display();
   b4.display();
+  if(menuOpen){
+    menu();
+  }
   //Display Goal Area
   pushMatrix();
     fill(50,50,150,100);
@@ -129,7 +168,7 @@ void draw() {
     text("Place the\n ball in\n this area",150,330);
     popMatrix();
   }
-  if(itemSelected=="box"){
+  if(itemSelected=="box" && gameState == "planning"){
     pushMatrix();
       translate(mouseX,mouseY);
       rotate(-boxRot);
@@ -154,7 +193,6 @@ void draw() {
         fill(0);
         pushMatrix();
         translate(25,60);
-        textMode(NORMAL);
         textAlign(LEFT);
         text("Screws Depleated!", 0, 0);
         translate(0,0);
@@ -163,13 +201,12 @@ void draw() {
         pushMatrix();
         fill(0);
         translate(25,670);
-        textMode(NORMAL);
         textAlign(LEFT);
         text("Screws Remaining: "+screwsRemaining, 0, 0);
         translate(0,0);
         popMatrix();
   }
-  if(itemSelected=="ball"){
+  if(itemSelected=="ball" && gameState == "preGame"){
     pushMatrix();
     translate(mouseX,mouseY);
     fill(175,175,175,100);
@@ -211,7 +248,7 @@ void mouseReleased(){
  }
 }
 void mousePressed(){
-  if (mouseButton == LEFT && !itemAdded && itemSelected == "box") {
+  if (mouseButton == LEFT && !itemAdded && itemSelected == "box" && gameState== "planning") {
     if(screwsRemaining > 0){
       Box p = new Box(boxWidth, 16, boxRot, frozenEnabled);
           boxes.add(p);
@@ -234,10 +271,10 @@ void mousePressed(){
     itemSelected = null;
     cursor();
   }
-  if (mouseButton == LEFT && !itemAdded && itemSelected == "screw"){
-    for(Box b: boxes){
-      
-    }
+  if (mouseButton == LEFT){
+    menuButtons();
+
+    
   }
 }
 void keyPressed(){
@@ -267,14 +304,77 @@ void stdErr(String par1){
   println("[INFO] [STDERR]"+par1);
 }
 void toggleMenu(){
+  if(gameState == "menu"){
+    gameState = gamestateBuffer;
+  }else{
+    gamestateBuffer = gameState;
+    gameState = "menu";
+  }
   menuOpen = !menuOpen;
 }
 void menu(){
-  fill(0);
+
+  if(mouseX>=width/2-156 && mouseX <= width/2-156+300 && mouseY>=height/3-6.5 && mouseY<=height/3-6.5+40){
+    button1 = true;
+    b1r = 50;
+    b1g = 80;
+    b1b = 185;
+  }else{
+    button1 = false;
+    b1r = 255;
+    b1g = 255;
+    b1b = 255;
+  }
+  if(mouseX>=width/2-156 && mouseX <= width/2-156+300 && mouseY>=height/2+2 && mouseY<=height/2+42){
+    button2 = true;
+    b2r = 200;
+    b2g = 70;
+    b2b = 50;
+  }else{
+    button2 = false;
+    b2r = 255;
+    b2g = 255;
+    b2b = 255;
+  }
   pushMatrix();
-  translate(width/2,height/2);
+    translate(width/2-156,height/3-6.5);
+    
+    fill(b1r,b1g,b1b);
+    strokeWeight(2);
+    stroke(0);
+    rectMode(NORMAL);
+    rect(0,0,300,40);
+  popMatrix();
+  
+  pushMatrix();
+    translate(width/2-156,height/2+2);
+    fill(b2r,b2g,b2b);
+    strokeWeight(2);
+    stroke(0);
+    rectMode(NORMAL);
+    rect(0,0,300,40);
+  popMatrix();
+ 
+  //menu text
+    fill(0);
+  pushMatrix();
+  translate(width/2-10,height/3+25);
   textAlign(CENTER);
-  text("MENUTEST", 0, 0);
+  text("Return to Game \n\n Exit", 0, 0);
   translate(0,0);
   popMatrix(); 
+}
+synchronized void menuButtons(){
+      if(button1){
+      toggleMenu();
+      button1 = false;
+    }
+    if(button2){
+      try{
+        wait(100);
+      }catch(Exception e){
+        print(e);
+      }
+      exit();
+    }
 }
