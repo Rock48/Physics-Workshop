@@ -33,7 +33,7 @@ class Surface {
   ArrayList<Vec2> surface;
   
   Surface(){
-    println("[STDOUT]Generating Terrain");
+    PhysicsWorkshop.stdOut("Generating terrain");
     surface = new ArrayList<Vec2>();
     float y=0;
     for(int i=0; i<width;i++){

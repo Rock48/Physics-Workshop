@@ -296,11 +296,11 @@ void keyPressed(){
 
   }
 }
-void stdOut(String par1){
+static void stdOut(String par1){
   println("[INFO] [STDOUT]"+par1);
   //pause(500);
 }
-void stdErr(String par1){
+static void stdErr(String par1){
   println("[INFO] [STDERR]"+par1);
 }
 void toggleMenu(){
